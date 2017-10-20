@@ -1,0 +1,72 @@
+nginx:
+  image: nginx:latest
+  restart: always
+  ports:
+    - 80:80
+    - 443:443
+  log_driver: syslog
+  links:
+    - wordpress
+  volumes:
+    - /home/wmitaine/Perso/workspace/docker/data/wordpress:/var/www/html:ro
+    - /home/wmitaine/Perso/workspace/docker/data/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    - /home/wmitaine/Perso/workspace/docker/data/nginx/log/nginx:/var/log/nginx
+  
+mariadb:
+  image: mariadb:latest
+  volumes:
+    - /home/wmitaine/Perso/workspace/docker/data/mariadb:/var/lib/mysql
+  environment:
+    MYSQL_ROOT_PASSWORD: azerty
+  
+wp_blog1:
+  image: wordpress:php7.1-fpm
+  links:
+    - mariadb
+  volumes:
+    - /home/wmitaine/Perso/workspace/docker/data/wordpress/blog1:/var/www/html
+  environment:
+    WORDPRESS_DB_HOST: mariadb 
+    WORDPRESS_DB_USER: root 
+    WORDPRESS_DB_PASSWORD: azerty
+    WORDPRESS_DB_NAME: blog1
+ 
+wp_blog2:
+  image: wordpress:php7.1-fpm
+  links:
+    - mariadb
+  volumes:
+    - /home/wmitaine/Perso/workspace/docker/data/wordpress/blog2:/var/www/html
+  environment:
+    WORDPRESS_DB_HOST: mariadb 
+    WORDPRESS_DB_USER: root 
+    WORDPRESS_DB_PASSWORD: azerty
+    WORDPRESS_DB_NAME: blog2
+
+myadmin:
+  image: phpmyadmin/phpmyadmin
+  ports:
+    - 8181:80
+  links:
+    - mariadb
+  environment:
+    MYSQL_ROOT_PASSWORD: azerty
+    PMA_HOST: mariadb
+
+next:
+  image: nextcloud:fpm
+  links:
+    - mariadb
+  volumes:
+    - /home/wmitaine/Perso/workspace/docker/data/nextcloud:/var/www/html
+  environment:
+    - MYSQL_HOST: mariadb
+    - MYSQL_USER: nextcloud
+    - MYSQL_PASSWORD: azerty
+    - MYSQL_DATABASE: nextcloud
+own:
+  image: owncloud:fpm
+  volumes:
+    - /home/wmitaine/Perso/workspace/docker/data/owncloud/apps:/var/www/html/apps
+    - /home/wmitaine/Perso/workspace/docker/data/owncloud/config:/var/www/html/config
+    - /home/wmitaine/Perso/workspace/docker/data/owncloud/data:/var/www/html/data
